@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MiniDesk - Available Devices</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+      color: #e0e0e0;
+      min-height: 100vh;
+      position: relative;
+      padding: 2rem;
+    }
+
+    /* Matrix-like background effect */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        linear-gradient(90deg, rgba(0, 255, 136, 0.03) 1px, transparent 1px),
+        linear-gradient(rgba(0, 255, 136, 0.03) 1px, transparent 1px);
+      background-size: 20px 20px;
+      animation: matrix 20s linear infinite;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    @keyframes matrix {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(20px); }
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 3rem;
+      animation: slideDown 0.8s ease-out;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    h1 {
+      font-size: 3rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #00d4ff 0%, #00ff88 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+      text-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+    }
+
+    .subtitle {
+      font-size: 1.2rem;
+      color: #888;
+      font-weight: 300;
+    }
+
+    .devices-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .device-card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 2rem;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      animation: slideUp 0.8s ease-out;
+      animation-fill-mode: both;
+    }
+
+    .device-card:nth-child(1) { animation-delay: 0.1s; }
+    .device-card:nth-child(2) { animation-delay: 0.2s; }
+    .device-card:nth-child(3) { animation-delay: 0.3s; }
+    .device-card:nth-child(4) { animation-delay: 0.4s; }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .device-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.1), transparent);
+      transition: left 0.5s;
+    }
+
+    .device-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(0, 212, 255, 0.3);
+      box-shadow: 0 20px 40px rgba(0, 212, 255, 0.1);
+    }
+
+    .device-card:hover::before {
+      left: 100%;
+    }
+
+    .device-name {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: #00ff88;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .device-name::before {
+      content: '●';
+      color: #00ff88;
+      font-size: 0.8rem;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    .device-ip {
+      font-size: 1rem;
+      color: #888;
+      margin-bottom: 1.5rem;
+      font-family: 'SF Mono', monospace;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      border-left: 3px solid #00d4ff;
+    }
+
+    .connect-btn {
+      background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 0.8rem 2rem;
+      font-family: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-size: 0.9rem;
+      text-decoration: none;
+      display: inline-block;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .connect-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0, 212, 255, 0.3);
+      background: linear-gradient(135deg, #00e6ff 0%, #00b3e6 100%);
+    }
+
+    .connect-btn:active {
+      transform: translateY(0);
+    }
+
+    .connect-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .connect-btn:hover::before {
+      left: 100%;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      animation: fadeIn 0.8s ease-out 0.3s both;
+    }
+
+    .empty-icon {
+      font-size: 4rem;
+      color: #444;
+      margin-bottom: 1rem;
+    }
+
+    .empty-message {
+      font-size: 1.2rem;
+      color: #888;
+      margin-bottom: 0.5rem;
+    }
+
+    .empty-submessage {
+      font-size: 1rem;
+      color: #666;
+    }
+
+    .status-indicator {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 0.5rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+      z-index: 1000;
+      animation: slideDown 0.8s ease-out 0.5s both;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background: #00ff88;
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .refresh-btn {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      color: #00d4ff;
+      font-size: 1.5rem;
+      z-index: 1000;
+    }
+
+    .refresh-btn:hover {
+      transform: rotate(180deg) scale(1.1);
+      background: rgba(0, 212, 255, 0.2);
+      box-shadow: 0 10px 20px rgba(0, 212, 255, 0.2);
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 1rem;
+      }
+      
+      h1 {
+        font-size: 2rem;
+      }
+      
+      .devices-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+      
+      .device-card {
+        padding: 1.5rem;
+      }
+      
+      .status-indicator {
+        position: relative;
+        top: auto;
+        right: auto;
+        margin-bottom: 2rem;
+        justify-content: center;
+      }
+      
+      .refresh-btn {
+        bottom: 1rem;
+        right: 1rem;
+        width: 50px;
+        height: 50px;
+      }
+    }
+
+    /* Loading animation for when page loads */
+    .loading {
+      opacity: 0;
+      animation: fadeIn 0.8s ease-out 0.2s forwards;
+    }
+  </style>
+</head>
+<body>
+  <div class="status-indicator">
+    <div class="status-dot"></div>
+    <span>MiniDesk Network Scanner</span>
+  </div>
+
+  <div class="container">
+    <div class="header">
+      <h1>MiniDesk</h1>
+      <p class="subtitle">Available Devices on Network</p>
+    </div>
+
+    {% if devices|length > 0 %}
+    <div class="devices-grid">
+      {% for device in devices %}
+      <div class="device-card">
+        <div class="device-name">{{ device.name }}</div>
+        <div class="device-ip">{{ device.ip }}</div>
+        <a href="{{ url_for('connect', ip=device.ip) }}" class="connect-btn">
+          Connect Terminal
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">🔍</div>
+      <div class="empty-message">No devices found on the LAN</div>
+      <div class="empty-submessage">Make sure devices are connected and discoverable</div>
+    </div>
+    {% endif %}
+  </div>
+
+  <button class="refresh-btn" onclick="window.location.reload()" title="Refresh">
+    ↻
+  </button>
+
+  <script>
+    // Add loading class to body for initial animation
+    document.body.classList.add('loading');
+    
+    // Add some interactive effects
+    document.querySelectorAll('.device-card').forEach((card, index) => {
+      card.addEventListener('mouseenter', () => {
+        card.style.animationDelay = '0s';
+        card.style.animation = 'none';
+        card.offsetHeight; // Trigger reflow
+        card.style.animation = 'slideUp 0.3s ease-out';
+      });
+    });
+
+    // Add keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'r' || e.key === 'R') {
+        if (e.ctrlKey || e.metaKey) return; // Don't interfere with browser refresh
+        window.location.reload();
+      }
+    });
+
+    // Auto-refresh every 30 seconds
+    setTimeout(() => {
+      setInterval(() => {
+        const refreshBtn = document.querySelector('.refresh-btn');
+        refreshBtn.style.animation = 'pulse 0.5s ease-in-out';
+        setTimeout(() => {
+          refreshBtn.style.animation = '';
+        }, 500);
+      }, 30000);
+    }, 5000);
+  </script>
+</body>
+</html>

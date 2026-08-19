@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MiniDesk - Terminal: {{ ip }}</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+      color: #e0e0e0;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Matrix-like background effect */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        linear-gradient(90deg, rgba(0, 255, 136, 0.03) 1px, transparent 1px),
+        linear-gradient(rgba(0, 255, 136, 0.03) 1px, transparent 1px);
+      background-size: 20px 20px;
+      animation: matrix 20s linear infinite;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    @keyframes matrix {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(20px); }
+    }
+
+    .terminal-container {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+      gap: 1rem;
+    }
+
+    .terminal-header {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px 12px 0 0;
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      animation: slideDown 0.8s ease-out;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .terminal-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      background: linear-gradient(135deg, #00d4ff 0%, #00ff88 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .terminal-controls {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .control-btn {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .control-btn.close { background: #ff5f57; }
+    .control-btn.minimize { background: #ffbd2e; }
+    .control-btn.maximize { background: #28ca42; }
+
+    .control-btn:hover {
+      transform: scale(1.2);
+      box-shadow: 0 0 10px currentColor;
+    }
+
+    .terminal-output {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-top: none;
+      padding: 1.5rem;
+      overflow-y: auto;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      position: relative;
+      animation: fadeIn 0.8s ease-out 0.2s both;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .terminal-output::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .terminal-output::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .terminal-output::-webkit-scrollbar-thumb {
+      background: rgba(0, 212, 255, 0.3);
+      border-radius: 4px;
+    }
+
+    .terminal-output::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 212, 255, 0.5);
+    }
+
+    .terminal-input-container {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 0 0 12px 12px;
+      border-top: none;
+      padding: 1rem;
+      display: flex;
+      gap: 1rem;
+      animation: slideUp 0.8s ease-out 0.4s both;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .terminal-input {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      padding: 0.8rem 1rem;
+      color: #e0e0e0;
+      font-family: inherit;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+      outline: none;
+    }
+
+    .terminal-input:focus {
+      border-color: #00d4ff;
+      box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+      background: rgba(0, 0, 0, 0.8);
+    }
+
+    .terminal-input::placeholder {
+      color: #666;
+    }
+
+    .send-btn {
+      background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 0.8rem 1.5rem;
+      font-family: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-size: 0.85rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .send-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0, 212, 255, 0.3);
+      background: linear-gradient(135deg, #00e6ff 0%, #00b3e6 100%);
+    }
+
+    .send-btn:active {
+      transform: translateY(0);
+    }
+
+    .send-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .send-btn:hover::before {
+      left: 100%;
+    }
+
+    /* Command output styling */
+    .command-line {
+      margin-bottom: 0.5rem;
+      animation: typewriter 0.5s ease-out;
+    }
+
+    @keyframes typewriter {
+      from { width: 0; }
+      to { width: 100%; }
+    }
+
+    .command-prompt {
+      color: #00ff88;
+      font-weight: 600;
+    }
+
+    .command-output {
+      color: #e0e0e0;
+      white-space: pre-wrap;
+      margin-left: 1rem;
+    }
+
+    .error-output {
+      color: #ff6b6b;
+      margin-left: 1rem;
+    }
+
+    /* Cursor animation */
+    .cursor {
+      display: inline-block;
+      width: 2px;
+      height: 1.2em;
+      background: #00ff88;
+      animation: blink 1s infinite;
+      margin-left: 2px;
+    }
+
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+
+    /* Connection status indicator */
+    .status-indicator {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 0.5rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+      z-index: 1000;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background: #00ff88;
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    @media (max-width: 768px) {
+      .terminal-container {
+        padding: 0.5rem;
+      }
+      
+      .terminal-input-container {
+        flex-direction: column;
+      }
+      
+      .send-btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="status-indicator">
+    <div class="status-dot"></div>
+    <span>Connected to {{ ip }}</span>
+  </div>
+
+  <div class="terminal-container">
+    <div class="terminal-header">
+      <div class="terminal-title">Terminal - {{ ip }}</div>
+      <div class="terminal-controls">
+        <div class="control-btn close"></div>
+        <div class="control-btn minimize"></div>
+        <div class="control-btn maximize"></div>
+      </div>
+    </div>
+    
+    <div class="terminal-output" id="output">
+      <div class="command-line">
+        <span class="command-prompt">Welcome to MiniDesk Terminal</span>
+      </div>
+      <div class="command-line">
+        <span class="command-output">Connected to {{ ip }}</span>
+      </div>
+      <div class="command-line">
+        <span class="command-output">Type your commands below...</span>
+      </div>
+    </div>
+    
+    <div class="terminal-input-container">
+      <input type="text" id="input" class="terminal-input" placeholder="Enter command..." autocomplete="off" />
+      <button id="send" class="send-btn">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const ip = "{{ ip }}";
+    const outputDiv = document.getElementById('output');
+    const inputBox = document.getElementById('input');
+    const sendBtn = document.getElementById('send');
+
+    function appendOutput(text, isCommand = false, isError = false) {
+      const line = document.createElement('div');
+      line.className = 'command-line';
+      
+      if (isCommand) {
+        line.innerHTML = `<span class="command-prompt">> ${text}</span><span class="cursor"></span>`;
+      } else if (isError) {
+        line.innerHTML = `<span class="error-output">${text}</span>`;
+      } else {
+        line.innerHTML = `<span class="command-output">${text.replace(/\n/g, "<br>")}</span>`;
+      }
+      
+      outputDiv.appendChild(line);
+      outputDiv.scrollTop = outputDiv.scrollHeight;
+      
+      // Remove cursor from previous command
+      const cursors = outputDiv.querySelectorAll('.cursor');
+      if (cursors.length > 1) {
+        cursors[cursors.length - 2].remove();
+      }
+    }
+
+    async function sendCommand(cmd) {
+      if (!cmd.trim()) return;
+      
+      // Remove cursor from input display
+      const cursors = outputDiv.querySelectorAll('.cursor');
+      cursors.forEach(cursor => cursor.remove());
+      
+      appendOutput(cmd, true);
+      
+      try {
+        const response = await fetch('/exec_remote', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ip: ip, cmd: cmd })
+        });
+        const data = await response.json();
+        
+        if (data.output) {
+          appendOutput(data.output);
+        } else if (data.error) {
+          appendOutput(`Error: ${data.error}`, false, true);
+        }
+      } catch (e) {
+        appendOutput('Error: Failed to send command', false, true);
+      }
+    }
+
+    sendBtn.addEventListener('click', () => {
+      sendCommand(inputBox.value);
+      inputBox.value = '';
+      inputBox.focus();
+    });
+
+    inputBox.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        sendCommand(inputBox.value);
+        inputBox.value = '';
+      }
+    });
+
+    // Auto-focus input
+    inputBox.focus();
+
+    // Add some startup animation
+    setTimeout(() => {
+      inputBox.style.animation = 'glow 2s ease-in-out infinite alternate';
+    }, 2000);
+  </script>
+
+  <style>
+    @keyframes glow {
+      from { box-shadow: 0 0 5px rgba(0, 212, 255, 0.2); }
+      to { box-shadow: 0 0 20px rgba(0, 212, 255, 0.4); }
+    }
+  </style>
+</body>
+</html>

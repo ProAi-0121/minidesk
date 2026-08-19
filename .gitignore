@@ -1,0 +1,29 @@
+# Local configuration (never commit real .env)
+.env
+
+# Backup of the original project before cleanup
+backup/
+
+# Python cache/build artifacts
+__pycache__/
+*.py[cod]
+*.so
+
+# PyInstaller build output
+dist/
+build/
+*.spec
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Logs
+*.log
+
+# Editor / OS noise
+.idea/
+.vscode/
+Thumbs.db
+.DS_Store
