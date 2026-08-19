@@ -284,7 +284,7 @@ def exec_remote():
 
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.settimeout(3)
+            s.settimeout(10)
             s.connect((ip, COMMAND_PORT))
             s.sendall(cmd.encode())
             response = b""
