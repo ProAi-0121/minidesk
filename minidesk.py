@@ -183,7 +183,7 @@ def smart_scanner():
         except Exception as e:
             print(f"[SCANNER ERROR] {e}")
         
-        time.sleep(60) 
+        time.sleep(300) 
 
 def device_cleanup():
     """Remove devices that haven't been seen recently"""
