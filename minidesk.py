@@ -112,7 +112,7 @@ def listener():
             data, addr = sock.recvfrom(1024)
             info = json.loads(data.decode())
             
-            if info.get('app') == 'MiniDesk':
+            if info.get('app') == 'MiniDesk' and info['ip'] != local_ip:
                 if verify_minidesk_device(info['ip'], timeout=1):
                     with devices_lock:
                         minidesk_devices[info['ip']] = {
