@@ -193,7 +193,7 @@ def device_cleanup():
         with devices_lock:
             expired_devices = []
             for ip, device in minidesk_devices.items():
-                if current_time - device.get('last_seen', 0) > 30:
+                if current_time - device.get('last_seen', 0) > 60:
                     expired_devices.append(ip)
             
             for ip in expired_devices:
