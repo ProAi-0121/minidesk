@@ -71,7 +71,7 @@ pip install pyinstaller
 Build a **single-file executable with no console window**:
 
 ```bash
-pyinstaller --onefile --noconsole --name MiniDesk --icon=icon.ico minidesk.py
+pyinstaller --onefile --noconsole --name MiniDesk --icon=icon.ico --add-data "templates;templates" minidesk.py
 ```
 
 The executable will be created at:
@@ -86,19 +86,6 @@ without installing Python or the project dependencies.
 > **Note:** `--noconsole` hides the terminal window. If you are debugging
 > startup or runtime errors, temporarily remove `--noconsole` so errors are
 > visible in the console.
-
-### Build from a clean environment
-
-If you want to rebuild from scratch:
-
-```bash
-rmdir /s /q build
-rmdir /s /q dist
-del MiniDesk.spec
-pyinstaller --onefile --noconsole --name MiniDesk --icon=icon.ico minidesk.py
-```
-
-If `icon.ico` is not available, omit the `--icon=icon.ico` option.
 
 ## Project Structure
 
@@ -128,11 +115,3 @@ README.md              Project documentation
   executables can trigger reputation warnings on Windows. This does not
   necessarily mean the executable is malicious.
 
-## Security
-
-The command server runs whatever you send it as a shell command on the target
-machine. Only run MiniDesk on networks and machines you trust.
-
-MiniDesk is intended for trusted LAN environments and should not be exposed
-directly to the public internet without adding proper authentication,
-authorization, encryption, and other security controls.
